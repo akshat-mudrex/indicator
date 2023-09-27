@@ -9,7 +9,7 @@ Backtesting is the method for seeing how well a strategy would have done. The fo
 
 #### Apply Actions
 
-The [ApplyActions](https://pkg.go.dev/github.com/cinar/indicator#ApplyActions) takes the given list of prices, applies the given list of normalized actions, and returns the gains.
+The [ApplyActions](https://pkg.go.dev/github.com/akshat-mudrex/indicator#ApplyActions) takes the given list of prices, applies the given list of normalized actions, and returns the gains.
 
 ```golang
 gains := indicator.ApplyActions(prices, actions)
@@ -17,7 +17,7 @@ gains := indicator.ApplyActions(prices, actions)
 
 #### Count Transactions
 
-The [CountTransactions](https://pkg.go.dev/github.com/cinar/indicator#CountTransactions) takes a list of normalized actions, and counts the _BUY_ and _SELL_ actions.
+The [CountTransactions](https://pkg.go.dev/github.com/akshat-mudrex/indicator#CountTransactions) takes a list of normalized actions, and counts the _BUY_ and _SELL_ actions.
 
 ```golang
 count := indicator.CountTransactions(actions)
