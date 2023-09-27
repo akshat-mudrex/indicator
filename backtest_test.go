@@ -9,7 +9,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/cinar/indicator"
+	"github.com/akshat-mudrex/indicator"
 )
 
 func TestNormalizeActions(t *testing.T) {

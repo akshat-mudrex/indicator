@@ -8,7 +8,7 @@ package indicator
 import (
 	"math"
 
-	"github.com/cinar/indicator/container/bst"
+	"github.com/akshat-mudrex/indicator/container/bst"
 )
 
 // Trend indicator.
