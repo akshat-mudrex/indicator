@@ -672,3 +672,178 @@ func Vwma(period int, closing []float64, volume []int64) []float64 {
 func DefaultVwma(closing []float64, volume []int64) []float64 {
 	return Vwma(20, closing, volume)
 }
+
+// The HMA function calcualtes the Hull's Moving Average (HMA).
+// Hull Moving Average (HMA) is a special moving average which was developed for the purpose of reducing lag, increasing responsiveness while at the same time eliminating noise.
+// returns hma and hmaSignal as float64 array.
+func Hma(close []float64, windowSize int) ([]float64, []float64) {
+
+	wma1 := Wma(close, windowSize/2)
+	wma2 := Wma(wma1, windowSize/2)
+	wma3 := subtract(multiplyBy(wma2, 2), wma1)
+
+	hullma := Wma(wma3, int(math.Sqrt(float64(windowSize))))
+	hmaEma := Ema(windowSize, hullma)
+
+	hmaSignal := divide(subtract(hullma, hmaEma), hmaEma)
+	return hullma, hmaSignal
+}
+
+// return wma as float64 array.
+func Wma(close []float64, windowSize int) []float64 {
+	wma := make([]float64, len(close))
+	arrays := make([][]float64, windowSize)
+	for j := 1; j <= windowSize; j++ {
+		arrays[j] = shiftRightAndFillBy(j, 0, close)
+		wma = add(wma, multiplyBy(arrays[j], float64(windowSize-j+1)/(0.5*float64(windowSize*(windowSize+1)))))
+	}
+	return wma
+}
+
+// Super trend returns the super trend indicator.
+// returns super trend as float64 array.
+func SuperTrend(high, low, close []float64, windowSize int, multiplier int) []float64 {
+	superTrend := make([]float64, len(close))
+	atr_window := float64(windowSize)
+	hl2 := divideBy(add(high, low), 2.0)
+	uptrend := false
+	prev_average_tr := 0.0
+	prev_final_upper_band := 0.0
+	prev_final_lower_band := 0.0
+
+	for i := 1; i < len(close); i++ {
+		tr := math.Max(high[i], close[i-1]) - math.Min(low[i], close[i-1])
+		average_tr := (prev_average_tr*(atr_window-1) + tr) / float64(atr_window)
+		prev_average_tr = average_tr
+
+		if i > windowSize {
+			basic_upper_band := hl2[i] + float64(multiplier)*average_tr
+			basic_lower_band := hl2[i] - float64(multiplier)*average_tr
+			final_upper_band := 0.0
+			final_lower_band := 0.0
+
+			if basic_upper_band < prev_final_upper_band || close[i-1] > prev_final_upper_band {
+				final_upper_band = basic_upper_band
+			} else {
+				final_upper_band = prev_final_upper_band
+			}
+
+			if basic_lower_band > prev_final_lower_band || close[i-1] < prev_final_lower_band {
+				final_lower_band = basic_lower_band
+			} else {
+				final_lower_band = prev_final_lower_band
+			}
+
+			prev_final_lower_band = final_lower_band
+			prev_final_upper_band = final_upper_band
+
+			if close[i] >= final_upper_band {
+				uptrend = true
+			} else if close[i] <= final_lower_band {
+				uptrend = false
+			}
+
+			if uptrend {
+				superTrend[i] = final_lower_band
+			} else {
+				superTrend[i] = final_upper_band
+			}
+
+		}
+	}
+
+	return superTrend
+}
+
+// ultimate oscillator
+// Returns oscillator as float64 array.
+func UltimateOsc(high, low, close []float64) []float64 {
+	bp7 := make([]float64, 7)
+	bp14 := make([]float64, 14)
+	bp28 := make([]float64, 28)
+	tr7 := make([]float64, 7)
+	tr14 := make([]float64, 14)
+	tr28 := make([]float64, 28)
+	oscillator := make([]float64, len(close))
+
+	for i := 1; i < len(high); i++ {
+		bp := close[i] - math.Min(low[i], close[i-1])
+		tr := math.Max(high[i], close[i-1]) - math.Min(low[i], close[i-1])
+		bp7[i%7] = bp
+		tr7[i%7] = tr
+		bp14[i%14] = bp
+		tr14[i%14] = tr
+		bp28[i%28] = bp
+		tr28[i%28] = tr
+
+		if i > 28 {
+			average7 := sum(bp7) / sum(tr7)
+			average14 := sum(bp14) / sum(tr14)
+			average28 := sum(bp28) / sum(tr28)
+			oscillator[i] = 100 * (4*average7 + 2*average14 + average28) / 7
+		}
+	}
+
+	return oscillator
+}
+
+// Guppy Multiple Moving Average (GMMA) is an indicator used in technical analysis to identify changing trends.
+// The technique consists of combining two groups of moving averages with differing time periods.
+// Returns GMMA as float64 array.
+func Gmma(close []float64) []float64 {
+	lookbacks := []int{3, 5, 8, 10, 12, 15, 30, 35, 40, 45, 50, 60}
+	gmma := make([][]float64, len(close))
+
+	for _, window := range lookbacks {
+		gmma[window] = make([]float64, len(close))
+		for i := 1; i < len(close); i++ {
+			gmma[window][i] = gmma[window][i-1] + alpha(window)*(close[i-1]-gmma[window][i-1])
+		}
+	}
+
+	short_avg := make([]float64, len(close))
+	long_avg := make([]float64, len(close))
+
+	for i := 1; i < len(close); i++ {
+		short_avg[i] = (gmma[3][i] + gmma[5][i] + gmma[8][i] + gmma[10][i] + gmma[12][i] + gmma[15][i]) / 6
+		long_avg[i] = (gmma[30][i] + gmma[35][i] + gmma[40][i] + gmma[45][i] + gmma[50][i] + gmma[60][i]) / 6
+	}
+
+	return divide(subtract(short_avg, long_avg), short_avg)
+}
+
+// ASI function calculates the Accumulative Swing Index (ASI) indicator.
+// Returns ASI and ASI Signal as float64 arrays.
+func Asi(open, high, low, close []float64, windowSize int) ([]float64, []float64) {
+	si := make([]float64, 2*windowSize)
+	asi := make([]float64, len(close))
+	asiSignal := make([]float64, len(close))
+	prevAsiEma := 0.0
+
+	for i := 1; i < len(close); i++ {
+		r := 0.0
+		if math.Max(math.Max(high[i]-close[i-1], low[i]-close[i-1]), high[i]-low[i]) == (high[i] - close[i-1]) {
+			r = high[i] - close[i-1] - 0.5*(low[i]-close[i-1]) + 0.25*(close[i-1]-open[i-1])
+		} else if math.Max(math.Max(high[i]-close[i-1], low[i]-close[i-1]), high[i]-low[i]) == (low[i] - close[i-1]) {
+			r = low[i] - close[i-1] - 0.5*(high[i]-close[i-1]) + 0.25*(close[i-1]-open[i-1])
+		}
+
+		k := math.Max(high[i-1]-close[i], low[i-1]-close[i])
+		t := high[i] - low[i]
+
+		si[i%(2*windowSize)] = 50 * (close[i-1] - close[i] + 0.5*(close[i-1]-open[i-1]) + 0.25*(close[i]-open[i])) * k / (r * t)
+		asi[i] = sum(si)
+
+		asiEma := prevAsiEma + alpha(windowSize)*(asi[i-1]-prevAsiEma)
+		prevAsiEma = asiEma
+		if i > 2*windowSize {
+			asiSignal[i] = (asi[i] - asiEma) / asiEma
+		}
+	}
+
+	return asiSignal, asi
+}
+
+func alpha(n int) float64 {
+	return 2 / float64(n+1)
+}

@@ -298,3 +298,29 @@ func WilliamsR(low, high, closing []float64) []float64 {
 
 	return result
 }
+
+// returns the chande momentum oscillator and its ema or signal
+func chande(close []float64, windowSize int) ([]float64, []float64) {
+	highCloses := make([]float64, windowSize)
+	lowCloses := make([]float64, windowSize)
+	oscillator := make([]float64, len(close))
+
+	for i := 1; i < len(close); i++ {
+		if close[i] > close[i-1] {
+			highCloses[i%windowSize] = close[i] - close[i-1]
+		} else if close[i] < close[i-1] {
+			lowCloses[i%windowSize] = close[i-1] - close[i]
+		}
+
+		oscillator[i] = (sum(highCloses) - sum(lowCloses)) / (sum(highCloses) + sum(lowCloses))
+	}
+	return oscillator, Ema(windowSize/2, oscillator)
+}
+
+func sum(arr []float64) float64 {
+	sum := 0.0
+	for _, v := range arr {
+		sum += v
+	}
+	return sum
+}
