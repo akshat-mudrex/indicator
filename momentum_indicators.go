@@ -213,7 +213,7 @@ func RsiPeriodSignal(period, ema_period int, closing []float64) ([]float64, []fl
 		rs[i] = meanGains[i] / meanLosses[i]
 		rsi[i] = 100 - (100 / (1 + rs[i]))
 	}
-
+	rsi = fillNaNWith(rsi, 100.0)
 	rsi_ema := Ema(ema_period, rsi)
 	rsi_signal := divide(subtract(rsi, rsi_ema), rsi_ema)
 
