@@ -1,0 +1,40 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.20.5
+
+    - name: Go vet
+      run: go vet ./...
+
+    - name: Run Gosec
+      uses: securego/gosec@master
+      with:
+        args: ./...
+
+    - name: Go fix
+      run: go fix ./...
+      
+    - name: Go build
+      run: go build -v ./...
+
+    - name: Go test
+      run: go test -v -coverprofile=coverage.out ./...
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      
