@@ -679,7 +679,7 @@ func DefaultVwma(closing []float64, volume []int64) []float64 {
 func Hma(close []float64, windowSize int) ([]float64, []float64) {
 
 	wma1 := Wma(close, windowSize/2)
-	wma2 := Wma(wma1, windowSize/2)
+	wma2 := Wma(close, windowSize/2)
 	wma3 := subtract(multiplyBy(wma2, 2), wma1)
 
 	hullma := Wma(wma3, int(math.Sqrt(float64(windowSize))))
