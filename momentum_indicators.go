@@ -48,14 +48,15 @@ func DefaultChaikinOscillator(low, high, closing []float64, volume []int64) ([]f
 // DefaultChaikinSignal function calculates Chaikin Oscillator and Chaikin Oscillator signal.
 // It uses the default 10,3 setting for calculating the oscillator.
 // Takes period (int) as input for the oscillator signal which is just an n-period EMA of the oscillator.
-// 
+//
 // Returns Oscillator and Oscillator signal values as float64 arrays
 func DefaultChaikinSignal(low, high, closing []float64, volume []int64, period int) ([]float64, []float64) {
-	co, ad := DefaultChaikinOscillator(3, 10, low, high, closing, volume)
+	co, _ := DefaultChaikinOscillator(low, high, closing, volume)
 	co_signal := Ema(period, co)
-	
-	return co, co_signal 
+
+	return co, co_signal
 }
+
 // Ichimoku Cloud. Also known as Ichimoku Kinko Hyo, is a versatile indicator that defines support and
 // resistence, identifies trend direction, gauges momentum, and provides trading signals.
 //
@@ -184,7 +185,7 @@ func RsiPeriod(period int, closing []float64) ([]float64, []float64) {
 // Modified RsiPeriod func to calculate a signal line for Rsi using
 // n-period EMA of RSI.
 // Takes ema_period (int) as a parameter to calculate the EMA of RSI
-// 
+//
 // Returns rsi and rsi_signal as float64 arrays.
 func RsiPeriodSignal(period, ema_period int, closing []float64) ([]float64, []float64) {
 	gains := make([]float64, len(closing))
@@ -207,21 +208,21 @@ func RsiPeriodSignal(period, ema_period int, closing []float64) ([]float64, []fl
 
 	rsi := make([]float64, len(closing))
 	rs := make([]float64, len(closing))
-	
+
 	for i := 0; i < len(rsi); i++ {
 		rs[i] = meanGains[i] / meanLosses[i]
 		rsi[i] = 100 - (100 / (1 + rs[i]))
 	}
-	
-	rsi_ema := Ema(ema_period,rsi)
-	rsi_signal := divide(subtract(rsi,rsi_ema),rsi_ema) 
-	
+
+	rsi_ema := Ema(ema_period, rsi)
+	rsi_signal := divide(subtract(rsi, rsi_ema), rsi_ema)
+
 	return rsi, rsi_signal
 }
 
-// StochRsiSignal calculates Stochastic RSI and RSI using 
+// StochRsiSignal calculates Stochastic RSI and RSI using
 // custom period (int) for RSI and ema_period(int) for EMA window of RSI Signal.
-// 
+//
 // Returns Stochastic RSI and RSI Signal as float64 arrays.
 func StochRsiSignal(period, ema_period int, closing []float64) ([]float64, []float64) {
 	gains := make([]float64, len(closing))
@@ -250,9 +251,9 @@ func StochRsiSignal(period, ema_period int, closing []float64) ([]float64, []flo
 	}
 	rsi_min := Min(period, rsi)
 	rsi_max := Max(period, rsi)
-	stoch_rsi := divide(subtract(rsi,rsi_min),subtract(rsi_max,rsi_min)) 
-	rsi_ema := Ema(ema_period,rsi)
-	rsi_signal := divide(subtract(rsi,rsi_ema),rsi_ema)
+	stoch_rsi := divide(subtract(rsi, rsi_min), subtract(rsi_max, rsi_min))
+	rsi_ema := Ema(ema_period, rsi)
+	rsi_signal := divide(subtract(rsi, rsi_ema), rsi_ema)
 
 	return stoch_rsi, rsi_signal
 }
