@@ -179,6 +179,11 @@ func Macd(closing []float64) ([]float64, []float64) {
 	return macd, signal
 }
 
+// Custom function that calculates MACD using default 12,26 setting
+// Takes period (int) as custom input for calculating n-period EMA of the MACD
+// as Signal line.
+//
+// Returns Macd and MacdSignal as float64 arrays. 
 func MacdPeriod(closing []float64, period int) ([]float64, []float64) {
 	ema12 := Ema(12, closing)
 	ema26 := Ema(26, closing)
@@ -206,6 +211,11 @@ func MassIndex(high, low []float64) []float64 {
 	return mi
 }
 
+// MassIndexSignal function calculates the Mass Index similar to the func Mass Index
+// with one difference. It also calulates an EMA of the Mass Index for which it takes
+// period (int) as extra input apart from high and low prices.
+//
+// Returns mass index and mass index signal as float64 arrays.
 func MassIndexSignal(high,low []float64, period int) ([]float64,[]float64) {
 	ema1 := Ema(9, subtract(high, low))
 	ema2 := Ema(9, ema1)
