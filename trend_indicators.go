@@ -692,7 +692,7 @@ func Hma(close []float64, windowSize int) ([]float64, []float64) {
 // return wma as float64 array.
 func Wma(close []float64, windowSize int) []float64 {
 	wma := make([]float64, len(close))
-	arrays := make([][]float64, windowSize)
+	arrays := make([][]float64, windowSize+1)
 	for j := 1; j <= windowSize; j++ {
 		arrays[j] = shiftRightAndFillBy(j, 0, close)
 		wma = add(wma, multiplyBy(arrays[j], float64(windowSize-j+1)/(0.5*float64(windowSize*(windowSize+1)))))
