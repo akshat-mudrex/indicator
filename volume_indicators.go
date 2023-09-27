@@ -39,9 +39,11 @@ func AccumulationDistribution(high, low, closing []float64, volume []int64) []fl
 // On-Balance Volume (OBV). It is a technical trading momentum indicator that
 // uses volume flow to predict changes in stock price.
 //
-//                   volume, if Closing > Closing-Prev
+//	volume, if Closing > Closing-Prev
+//
 // OBV = OBV-Prev +       0, if Closing = Closing-Prev
-//                  -volume, if Closing < Closing-Prev
+//
+//	-volume, if Closing < Closing-Prev
 //
 // Returns obv
 func Obv(closing []float64, volume []int64) []int64 {
@@ -62,6 +64,29 @@ func Obv(closing []float64, volume []int64) []int64 {
 	}
 
 	return obv
+}
+
+func ObvSignal(closing []float64, volume []int64, period int) []float64 {
+	if len(closing) != len(volume) {
+		panic("not all same size")
+	}
+
+	obv := make([]int64, len(volume))
+
+	for i := 1; i < len(obv); i++ {
+		obv[i] = obv[i-1]
+
+		if closing[i] > closing[i-1] {
+			obv[i] += volume[i]
+		} else if closing[i] < closing[i-1] {
+			obv[i] -= volume[i]
+		}
+	}
+	obv_float64 := asFloat64(obv)
+	obv_ema := Ema(period, obv_float64)
+	obv_signal := divide(subtract(obv_float64, obv_ema), obv_ema)
+
+	return obv_signal
 }
 
 // The Money Flow Index (MFI) analyzes both the closing price and the volume
@@ -166,11 +191,11 @@ func DefaultVolumeWeightedAveragePrice(closing []float64, volume []int64) []floa
 //
 // If Volume is greather than Previous Volume:
 //
-//     NVI = Previous NVI
+//	NVI = Previous NVI
 //
 // Otherwise:
 //
-//     NVI = Previous NVI + (((Closing - Previous Closing) / Previous Closing) * Previous NVI)
+//	NVI = Previous NVI + (((Closing - Previous Closing) / Previous Closing) * Previous NVI)
 //
 // Returns nvi values.
 func NegativeVolumeIndex(closing []float64, volume []int64) []float64 {
@@ -199,7 +224,6 @@ func NegativeVolumeIndex(closing []float64, volume []int64) []float64 {
 // Money Flow Multiplier = ((Closing - Low) - (High - Closing)) / (High - Low)
 // Money Flow Volume = Money Flow Multiplier * Volume
 // Chaikin Money Flow = Sum(20, Money Flow Volume) / Sum(20, Volume)
-//
 func ChaikinMoneyFlow(high, low, closing []float64, volume []int64) []float64 {
 	moneyFlowMultiplier := divide(
 		subtract(subtract(closing, low), subtract(high, closing)),

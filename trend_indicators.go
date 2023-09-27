@@ -179,10 +179,15 @@ func Macd(closing []float64) ([]float64, []float64) {
 	return macd, signal
 }
 
+// Custom function that calculates MACD using default 12,26 setting
+// Takes period (int) as custom input for calculating n-period EMA of the MACD
+// as Signal line.
+//
+// Returns Macd and MacdSignal as float64 arrays.
 func MacdPeriod(closing []float64, period int) ([]float64, []float64) {
 	ema12 := Ema(12, closing)
 	ema26 := Ema(26, closing)
-	macd := subtract(ema12,ema26)
+	macd := subtract(ema12, ema26)
 	signal := Ema(period, macd)
 
 	return macd, signal
@@ -206,16 +211,22 @@ func MassIndex(high, low []float64) []float64 {
 	return mi
 }
 
-func MassIndexSignal(high,low []float64, period int) ([]float64,[]float64) {
+// MassIndexSignal function calculates the Mass Index similar to the func Mass Index
+// with one difference. It also calulates an EMA of the Mass Index for which it takes
+// period (int) as extra input apart from high and low prices.
+//
+// Returns mass index and mass index signal as float64 arrays.
+func MassIndexSignal(high, low []float64, period int) ([]float64, []float64) {
 	ema1 := Ema(9, subtract(high, low))
 	ema2 := Ema(9, ema1)
 	ratio := divide(ema1, ema2)
-	mi := Sum(25,ratio)
+	mi := Sum(25, ratio)
 
 	mi_ema := Ema(period, mi)
 
 	return mi, mi_ema
 }
+
 // Moving Chande Forecast Oscillator calculates based on
 // the given period.
 //
@@ -286,12 +297,12 @@ func Min(period int, values []float64) []float64 {
 // PSAR = PSAR[i - 1] - ((PSAR[i - 1] - EP) * AF)
 //
 // If the trend is Falling:
-//  - PSAR is the maximum of PSAR or the previous two high values.
-//  - If the current high is greather than or equals to PSAR, use EP.
+//   - PSAR is the maximum of PSAR or the previous two high values.
+//   - If the current high is greather than or equals to PSAR, use EP.
 //
 // If the trend is Rising:
-//  - PSAR is the minimum of PSAR or the previous two low values.
-//  - If the current low is less than or equals to PSAR, use EP.
+//   - PSAR is the minimum of PSAR or the previous two low values.
+//   - If the current low is less than or equals to PSAR, use EP.
 //
 // If PSAR is greater than the closing, trend is falling, and the EP
 // is set to the minimum of EP or the low.
@@ -380,9 +391,10 @@ func Qstick(period int, opening, closing []float64) []float64 {
 // crosses above 80%, and oversold when they crosses below
 // 20%. The J line represents the divergence.
 //
-//
 // RSV = ((Closing - Min(Low, rPeriod))
-//       / (Max(High, rPeriod) - Min(Low, rPeriod))) * 100
+//
+//	/ (Max(High, rPeriod) - Min(Low, rPeriod))) * 100
+//
 // K = Sma(RSV, kPeriod)
 // D = Sma(K, dPeriod)
 // J = (3 * K) - (2 * D)
@@ -517,9 +529,12 @@ func Tema(period int, values []float64) []float64 {
 // Trima function calculates the Triangular Moving Average (TRIMA).
 //
 // If period is even:
-//   TRIMA = SMA(period / 2, SMA((period / 2) + 1, values))
+//
+//	TRIMA = SMA(period / 2, SMA((period / 2) + 1, values))
+//
 // If period is odd:
-//   TRIMA = SMA((period + 1) / 2, SMA((period + 1) / 2, values))
+//
+//	TRIMA = SMA((period + 1) / 2, SMA((period + 1) / 2, values))
 //
 // Returns trima.
 func Trima(period int, values []float64) []float64 {
