@@ -179,6 +179,15 @@ func Macd(closing []float64) ([]float64, []float64) {
 	return macd, signal
 }
 
+func MacdPeriod(closing []float64, period int) ([]float64, []float64) {
+	ema12 := Ema(12, closing)
+	ema26 := Ema(26, closing)
+	macd := subtract(ema12,ema26)
+	signal := Ema(period, macd)
+
+	return macd, signal
+}
+
 // The Mass Index (MI) uses the high-low range to identify trend reversals
 // based on range expansions.
 //
@@ -197,6 +206,16 @@ func MassIndex(high, low []float64) []float64 {
 	return mi
 }
 
+func MassIndexSignal(high,low []float64, period int) ([]float64,[]float64) {
+	ema1 := Ema(9, subtract(high, low))
+	ema2 := Ema(9, ema1)
+	ratio := divide(ema1, ema2)
+	mi := Sum(25,ratio)
+
+	mi_ema := Ema(period, mi)
+
+	return mi, mi_ema
+}
 // Moving Chande Forecast Oscillator calculates based on
 // the given period.
 //
