@@ -678,12 +678,12 @@ func DefaultVwma(closing []float64, volume []int64) []float64 {
 // returns hma and hmaSignal as float64 array.
 func Hma(close []float64, windowSize int) ([]float64, []float64) {
 
-	wma1 := Wma(close, windowSize/2)
+	wma1 := Wma(close, windowSize)
 	wma2 := Wma(close, windowSize/2)
 	wma3 := subtract(multiplyBy(wma2, 2), wma1)
 
 	hullma := Wma(wma3, int(math.Sqrt(float64(windowSize))))
-	hmaEma := Ema(windowSize, hullma)
+	hmaEma := Ema(windowSize/2, hullma)
 
 	hmaSignal := divide(subtract(hullma, hmaEma), hmaEma)
 	return hullma, hmaSignal
