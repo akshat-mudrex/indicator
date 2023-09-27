@@ -96,10 +96,10 @@ func BollingerBands(closing []float64) ([]float64, []float64, []float64) {
 // to the upper band (uptrend) or lower band (downtrend).
 // Bases the bands on the typical price (H+L+C)/3.
 // Takes period (int) as custom length for the Bands and high, low and closing prices.
-// 
+//
 // Returns bol_signal as float64 array.
 func BollingerBandsSignal(high, low, closing []float64, period int) []float64 {
-	median_price := divideBy(add(high,add(low,closing)),3)
+	median_price := divideBy(add(high, add(low, closing)), 3)
 	middleBand := Sma(period, median_price)
 
 	std := Std(period, median_price)
@@ -107,25 +107,23 @@ func BollingerBandsSignal(high, low, closing []float64, period int) []float64 {
 
 	upperBand := add(middleBand, std2)
 	lowerBand := subtract(middleBand, std2)
-	bol_width := subtract(upperBand,lowerBand) 
-	
-	bol_signal := make([]float64,len(closing))
+	bol_width := subtract(upperBand, lowerBand)
 
-	buffer_len := int(period/2)
-	buffer := make([]float64,buffer_len)
-	
-	for i := 0; i<len(closing); i++ {
-		if (upperBand[i] - closing[i])/bol_width[i] < 0.1 or closing[i]>=upperBand[i] {
+	bol_signal := make([]float64, len(closing))
+
+	buffer_len := int(period / 2)
+	buffer := make([]float64, buffer_len)
+
+	for i := 0; i < len(closing); i++ {
+		if (upperBand[i]-closing[i])/bol_width[i] < 0.1 || closing[i] >= upperBand[i] {
 			buffer[i%buffer_len] = 1
-		}
-		else if (closing[i] - lowerBand[i])/bol_width[i] < 0.1 or closing[i]<=lowerBand[i] {
+		} else if (closing[i]-lowerBand[i])/bol_width[i] < 0.1 || closing[i] <= lowerBand[i] {
 			buffer[i%buffer_len] = -1
-		}
-		else {
+		} else {
 			buffer[i%buffer_len] = 0
 		}
-		bol_signal[i] = buffer.mean()
-		
+		bol_signal[i] = mean(buffer)
+
 	}
 	return bol_signal
 }
@@ -249,37 +247,35 @@ func DonchianChannel(period int, closing []float64) ([]float64, []float64, []flo
 	return upperChannel, middleChannel, lowerChannel
 }
 
-// Custom func DonchianChannelSignal calculates buy/sell signal based on whether 
+// Custom func DonchianChannelSignal calculates buy/sell signal based on whether
 // closing prices are closer to the upper channel or lower channel.
 // Takes period (int) as lookback period for the Channels. Takes high, low and closing prices.
-// 
+//
 // Returns signal as float64 array.
 func DonchianChannelSignal(period int, high, low, closing []float64) []float64 {
 	upperChannel := Max(period, high)
 	lowerChannel := Min(period, low)
-	channelWidth := subtract(upperChannel,lowerChannel)
+	channelWidth := subtract(upperChannel, lowerChannel)
 
-	don_signal := make([]float64,len(closing))
+	don_signal := make([]float64, len(closing))
 
-	buffer_len := int(period/4)
-	buffer := make([]float64,buffer_len)
-	
-	for i := 0; i<len(closing); i++ {
-		if (upperChannel[i] - closing[i])/channelWidth[i] < 0.25 or closing[i]>=upperChannel[i] {
+	buffer_len := int(period / 4)
+	buffer := make([]float64, buffer_len)
+
+	for i := 0; i < len(closing); i++ {
+		if (upperChannel[i]-closing[i])/channelWidth[i] < 0.25 || closing[i] >= upperChannel[i] {
 			buffer[i%buffer_len] = 1
-		}
-		else if (closing[i] - lowerChannel[i])/channelWidth[i] < 0.25 or closing[i]<=lowerChannel[i] {
+		} else if (closing[i]-lowerChannel[i])/channelWidth[i] < 0.25 || closing[i] <= lowerChannel[i] {
 			buffer[i%buffer_len] = -1
-		}
-		else {
+		} else {
 			buffer[i%buffer_len] = 0
 		}
+		don_signal[i] = mean(buffer)
 
-		don_signal[i] = buffer.mean()
-		
 	}
 	return don_signal
 }
+
 // The Keltner Channel (KC) provides volatility-based bands that are placed
 // on either side of an asset's price and can aid in determining the
 // direction of a trend.
